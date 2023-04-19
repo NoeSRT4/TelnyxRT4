@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context path="">
+ <!--   
+   <Resource auth="Container" driverClassName="org.postgresql.Driver" logAbandoned="true" 
+              maxActive="50" maxIdle="5" maxWait="20000" name="jdbc/basePostgresql" 
+              password="avaya200" removeAbandoned="true" removeAbandonedTimeout="20" 
+              type="javax.sql.DataSource" url="jdbc:postgresql://172.22.104.71:5432/postgres" username="postgres"/>
+ -->
+</Context>

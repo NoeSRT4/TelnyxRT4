@@ -1,0 +1,5 @@
+com\rt4\telnyx\domain\EditarObject.class
+com\rt4\telnyx\domain\SeleccionarObject.class
+com\rt4\telnyx\domain\AgregarObject.class
+com\rt4\telnyx\resources\TelnyxRS.class
+com\rt4\telnyx\App.class
