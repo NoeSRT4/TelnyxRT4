@@ -1,20 +1,22 @@
 package com.rt4.telnyx.resources;
 
+import com.rt4.telnyx.domain.Mensaje;
+import com.rt4.telnyx.service.MensajeServicio;
 
 
-import com.telnyx.sdk.model.InboundMessageEvent;
-import com.telnyx.sdk.model.InboundMessagePayload;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URLDecoder;
+import java.util.List;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+
+
 import java.util.Properties;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -22,9 +24,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.json.JSONObject;
 
+
 @Path("/message")
 public class TelnyxRS {
-
+    MensajeServicio mensajeServicio = new MensajeServicio();
     public static Logger log = setLogger();
     static String msg;
     static String logNum;
@@ -42,17 +45,51 @@ public class TelnyxRS {
                 .ok("ping : " + getPath())
                 .build();
     }
+    @POST
+    @Path("outbound")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response enviarMensaje(Mensaje msj){
+        //ENVIAR MENSAJE
+        //GUARDAR MENSAJE EN DB
+    
+        return null;
+    }
+    
+    @GET
+    @Path("get/{from}/{to}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response obtenerMensajes(@PathParam("from") String from,@PathParam("to") String to){
+        log.info("------------------------- INICIO get/{from}/{to}-------------------------");
+        log.info("from:" + from);
+        log.info("to:" + to);
+        log.info("Obteniendo mensajes");
+        List<Mensaje> listaMensajes = mensajeServicio.getMensajes(from, to);
+        JSONObject mensajesJSON = new JSONObject(listaMensajes);
+        
+        log.info("-------------------------   FIN  get/{from}/{to}-------------------------");
+        return Response.ok().entity(mensajesJSON.toString()).build();
+        
+    }
+    
     
     @POST
     @Path("/inbound")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response mesajeEntrada(String json){
-        log.info("------------------------- INICIO -------------------------");
-        
-        
-        log.info(json);
-        log.info("-------------------------- FIN ---------------------------");
+    public Response mesajeEntrada(String jsonString){
+        log.info("------------------------- INICIO /inbound-------------------------");
+        log.info(jsonString);
+        JSONObject json = new JSONObject(jsonString);
+        String to = json.getJSONObject("data").getJSONObject("payload").getJSONObject("from").getString("phone_number");
+        String from = json.getJSONObject("data").getJSONObject("payload").getJSONArray("to").getJSONObject(0).getString("phone_number");
+        String body = json.getJSONObject("data").getJSONObject("payload").getString("text");
+        String direction = json.getJSONObject("data").getJSONObject("payload").getString("direction");
+        Mensaje msj = new Mensaje(to,from,body,direction);        
+        log.info("Añadiendo mensaje");
+        log.info(msj.toString());
+        mensajeServicio.addMensaje(msj);
+        log.info("-------------------------- FIN /inbound---------------------------");
         return Response.ok().entity(json).build();
     }
     
@@ -101,7 +138,6 @@ public class TelnyxRS {
             logNum = properties.getProperty("LOG_NUM");
         } catch (Exception e) {
             e.printStackTrace(System.out);
-
         }
     }
     
